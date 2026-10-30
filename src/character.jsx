@@ -1,8 +1,27 @@
 import { useEffect, useRef, useState } from 'react'
+import episode1 from './assets/I.jpg'
+import episode2 from './assets/eII.jpg'
+import episode3 from './assets/eiii.jpg'
+import episode4 from './assets/eiv.jpg'
+import episode5 from './assets/ev.jpg'
+import episode6 from './assets/evi.jpg'
+import starshipThumbnail from './assets/starships.jpeg'
+import vehicleThumbnail from './assets/vehicles.jpg'
 
 const PEOPLE_URL = 'https://swapi.info/api/people'
 const FILMS_URL = 'https://swapi.info/api/films'
+// SWAPI leaves species empty for humans, so an empty list falls back to Human.
+const HUMAN_SPECIES_URL = 'https://swapi.info/api/species/1'
 const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX']
+// Film thumbnails keyed by SWAPI episode_id.
+const FILM_THUMBNAILS = {
+  1: episode1,
+  2: episode2,
+  3: episode3,
+  4: episode4,
+  5: episode5,
+  6: episode6,
+}
 
 async function getJson(url, signal) {
   const response = await fetch(url, { signal })
@@ -45,6 +64,7 @@ async function loadFilms(url, signal) {
       url: film.url,
       title: film.title,
       episode: `Episode ${ROMAN[film.episode_id - 1] ?? film.episode_id}`,
+      thumbnail: FILM_THUMBNAILS[film.episode_id],
     }))
 }
 
@@ -53,7 +73,7 @@ async function loadCharacter(url, signal) {
   const person = await getJson(url, signal)
   const [homeworld, species, starships, vehicles] = await Promise.all([
     person.homeworld ? getJson(person.homeworld, signal) : null,
-    person.species.length > 0 ? getJson(person.species[0], signal) : null,
+    getJson(person.species[0] ?? HUMAN_SPECIES_URL, signal),
     Promise.all(person.starships.map((shipUrl) => getJson(shipUrl, signal))),
     Promise.all(person.vehicles.map((vehicleUrl) => getJson(vehicleUrl, signal))),
   ])
@@ -70,7 +90,7 @@ async function loadCharacter(url, signal) {
       ['Hair color', person.hair_color],
       ['Skin color', person.skin_color],
     ],
-    species: species && {
+    species: {
       name: species.name,
       details: [
         ['Classification', species.classification],
@@ -145,19 +165,6 @@ function ImagePlaceholder({ className = '' }) {
   )
 }
 
-function CrossPlaceholder() {
-  return (
-    <svg
-      viewBox="0 0 56 40"
-      preserveAspectRatio="none"
-      className="h-14 w-20 shrink-0 border border-slate-400 bg-slate-50 text-slate-400 sm:h-16 sm:w-24"
-      aria-hidden="true"
-    >
-      <path d="M0 0 L56 40 M56 0 L0 40" stroke="currentColor" strokeWidth="0.75" vectorEffect="non-scaling-stroke" />
-    </svg>
-  )
-}
-
 function Message({ children }) {
   return <p className="text-sm text-slate-500">{children}</p>
 }
@@ -188,7 +195,7 @@ function DetailCard({ detail }) {
   )
 }
 
-function CraftList({ items, emptyText }) {
+function CraftList({ items, emptyText, thumbnail }) {
   if (items.length === 0) {
     return (
       <div className="rounded border border-slate-300 p-4">
@@ -201,7 +208,11 @@ function CraftList({ items, emptyText }) {
     <ul className="divide-y divide-slate-300 rounded border border-slate-300">
       {items.map((item) => (
         <li key={item.url} className="flex gap-4 p-4">
-          <CrossPlaceholder />
+          <img
+            src={thumbnail}
+            alt=""
+            className="h-14 w-20 shrink-0 border border-slate-400 object-cover sm:h-16 sm:w-24"
+          />
           <dl className="grid min-w-0 grid-cols-1 gap-y-1 text-sm sm:grid-cols-[auto_1fr] sm:gap-x-6 sm:gap-y-2">
             <dt className="font-bold text-slate-800">{item.name}</dt>
             <dd className="text-slate-700">{item.type}</dd>
@@ -359,7 +370,17 @@ function Character() {
                       key={film.url}
                       className={`flex flex-col items-center text-center text-xs ${appears ? 'text-slate-800' : 'text-slate-300'}`}
                     >
-                      <ImagePlaceholder className={`mb-2 size-12 ${appears ? 'text-slate-500' : 'text-slate-300'}`} />
+                      {film.thumbnail ? (
+                        <img
+                          src={film.thumbnail}
+                          alt=""
+                          width="96"
+                          height="48"
+                          className={`mb-2 h-12 w-24 object-cover ${appears ? '' : 'opacity-30 grayscale'}`}
+                        />
+                      ) : (
+                        <ImagePlaceholder className={`mb-2 size-12 ${appears ? 'text-slate-500' : 'text-slate-300'}`} />
+                      )}
                       <span className="font-bold">{film.title}</span>
                       <span>{film.episode}</span>
                     </li>
@@ -375,11 +396,11 @@ function Character() {
         <div className="grid gap-8 lg:grid-cols-2">
           <section>
             <SectionHeading>Starships</SectionHeading>
-            <CraftList items={selected?.starships ?? []} emptyText={selected ? 'No starships' : '—'} />
+            <CraftList items={selected?.starships ?? []} emptyText={selected ? 'No starships' : '—'} thumbnail={starshipThumbnail} />
           </section>
           <section>
             <SectionHeading>Vehicles</SectionHeading>
-            <CraftList items={selected?.vehicles ?? []} emptyText={selected ? 'No vehicles' : '—'} />
+            <CraftList items={selected?.vehicles ?? []} emptyText={selected ? 'No vehicles' : '—'} thumbnail={vehicleThumbnail} />
           </section>
         </div>
       </main>
