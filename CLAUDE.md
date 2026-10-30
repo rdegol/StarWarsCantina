@@ -12,8 +12,9 @@ React 19 + Vite 8 app in plain JavaScript/JSX (no TypeScript), styled with Tailw
 - `npm run build` — production build to `dist/` (multi-page: each root HTML file must be listed in `build.rolldownOptions.input` in `vite.config.js`)
 - `npm run preview` — serve the built `dist/` locally
 - `npm run lint` — lint with Oxlint (not ESLint)
+- `npm test` — Vitest in watch mode; `npx vitest run` runs once (CI-style); `npx vitest run -t "search"` runs tests whose name matches
 
-There is no test runner configured yet.
+Tests use jsdom + React Testing Library (`src/test/setup.js` adds jest-dom matchers, cleanup, and a `scrollIntoView` stub). `src/character.test.jsx` never hits the network: it stubs `fetch` with fixtures keyed by SWAPI URL, so new endpoints the page calls need a fixture added there.
 
 ## Structure and conventions
 
