@@ -306,6 +306,15 @@ function Character() {
     error: 'Could not load this character.',
   }[detail.status]
 
+  // Selects the first character (in list order) whose name contains the query,
+  // case-insensitively; no match clears the selection. An empty query leaves it as is.
+  function handleSearch(event) {
+    const query = event.target.value.trim().toLowerCase()
+    if (query === '') return
+    const match = (people.data ?? []).find((c) => c.name.toLowerCase().includes(query))
+    setSelectedUrl(match?.url ?? null)
+  }
+
   return (
     <div className="min-h-screen bg-white text-slate-800">
       <header className="border-b border-slate-300">
@@ -327,6 +336,7 @@ function Character() {
             <input
               type="search"
               placeholder="Search characters"
+              onChange={handleSearch}
               className="w-full rounded border border-slate-300 py-1.5 pr-3 pl-8 text-sm placeholder:text-slate-400 focus:border-slate-500 focus:outline-none"
             />
           </label>
