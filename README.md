@@ -85,16 +85,16 @@ The tests use a simulated browser (jsdom) and replace `fetch` with sample SWAPI 
 
 ## Technical Approach
 
-Since this is a read-only display page, the supporting data I build a web page that displayed the data returned from the API. As there was very limited data transformation in the front end, based on the wireframe, there was no need to build a middle tier to support data manipulation. My assumption that the REST API was handling the back-end data for the life of the app.
+Since this is a read-only display page, I built a web page that displays the data returned from the API. As there was very limited data transformation in the front end, based on the wireframe, there was no need to build a middle tier to support data manipulation. My assumption was that the REST API would handle the back-end data for the life of the app.
 
-Since the page need to refresh data based on data selections, I used React as the framework to display the data. This allow quick refresh of the page when a different character was chosen.
+Since the page needs to refresh data based on data selections, I used React as the framework to display the data. This allows a quick refresh of the page when a different character was chosen.
 
-It's a responsive web page but it has not been tested on mobile or table devices.
+It's a responsive web page but it has not been tested on mobile or tablet devices.
 
 ## Risks and Limitations
 
 - Based on the assumption that there is a limited set of data and characters, performance is not a concern. If we needed to scale to a large amount of characters, there could be performance issues.
-- Dynamically adding films in not possible.
+- Dynamically adding films is not possible.
 
 ## Future Enhancements
 - Additional pages for Film, Vehicle and Starship details
